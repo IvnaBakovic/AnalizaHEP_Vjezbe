@@ -1,0 +1,4 @@
+total 8,0K
+-rw-r--r--. 1 ibakovic ibakovic  0 Lis  1 11:05 output_3.txt
+-rw-r--r--. 1 ibakovic ibakovic 36 Lis  1 11:05 Zadatak_3.sh
+-rw-r--r--. 1 ibakovic ibakovic 36 Lis  1 10:48 Zadatak_2.txt
