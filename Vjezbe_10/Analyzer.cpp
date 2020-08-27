@@ -64,7 +64,7 @@ void Analyzer::ChiSquareFit()
   chi_square -> SetTitle("Chi-Square;m^{-1} [kg^{-1}];#chi^{2}");
 
   chi_square -> Draw();
-  c->SaveAs("ChiSquare.pdf");
+
 
    double min = chi_square->GetMinimumX();
    double min_mass = 1/min;
@@ -97,7 +97,31 @@ void Analyzer::ChiSquareFit()
 
   cout << "Analitički izračunat parametar preko Chi-Square metode: masa = " << 1/oneOverMass_hat << endl;
   cout << "Analitički izračunata standardna devijacija preko Chi-Square metode: sigma = " << sigma_oneOverMass/TMath::Power(oneOverMass_hat,2) << endl;
- 
+
+
+  chi_square->SetMinimum(1.0);
+
+  TLine *line_h = new TLine(oneOverMass_hat-sigma_m,chi_square->GetMinimum() + 1.0,oneOverMass_hat+sigma_p,chi_square->GetMinimum() + 1.0);
+  line_h->SetLineColor(kBlack);
+  line_h->SetLineStyle(kDashed);
+  line_h->Draw();
+
+  TLine *line_v1 = new TLine(oneOverMass_hat-sigma_m,1.0,oneOverMass_hat-sigma_m,chi_square->GetMinimum() + 1.0);
+  line_v1->SetLineColor(kBlack);
+  line_v1->SetLineStyle(kDashed);
+  line_v1->Draw();
+
+  TLine *line_v2 = new TLine(oneOverMass_hat,1.0,oneOverMass_hat,chi_square->GetMinimum());
+  line_v2->SetLineColor(kBlack);
+  line_v2->SetLineStyle(kDashed);
+  line_v2->Draw();
+
+  TLine *line_v3 = new TLine(oneOverMass_hat+sigma_p,1.0,oneOverMass_hat+sigma_p,chi_square->GetMinimum() + 1.0);
+  line_v3->SetLineColor(kBlack);
+  line_v3->SetLineStyle(kDashed);
+  line_v3->Draw();
+
+  c->SaveAs("ChiSquare.pdf");
 
    
 }
