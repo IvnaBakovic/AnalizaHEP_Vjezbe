@@ -109,3 +109,13 @@ void Analyzer::DrawClopperPearsonInterval(int N, double C)
   c->SaveAs("ClopperPearson.pdf");
 }
 
+int Analyzer::throwDice()
+{
+  int i;
+
+  i = (rand()%6)+1;
+
+  return i;
+
+}
+

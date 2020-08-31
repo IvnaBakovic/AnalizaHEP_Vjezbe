@@ -32,4 +32,5 @@ class Analyzer
     double ClopperPearsonUp(int,int,double);
     void DisplayClopperPearsonInterval();
     void DrawClopperPearsonInterval(int, double);
+    int throwDice();
 };
