@@ -13,6 +13,12 @@
 #include <TFile.h>
 #include <TH1F.h>
 #include <TLegend.h>
+#include <TString.h>
+
+#include "TMVA/Factory.h"
+#include "TMVA/DataLoader.h"
+#include "TMVA/Tools.h"
+
 
 // Header file for the classes stored in the TTree if any.
 
@@ -172,6 +178,7 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    TLegend* CreateLegend(TH1F*, TH1F*);
+   virtual void     MVATraining(TString metoda);
 
    TH1F *histoSignal[8], *histoBackground[8];
 };

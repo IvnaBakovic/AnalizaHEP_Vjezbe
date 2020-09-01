@@ -192,3 +192,103 @@ TLegend* Analyzer::CreateLegend(TH1F *histo1, TH1F *histo2)
   return leg;
 }
 
+void Analyzer::MVATraining(TString metoda)
+
+{
+TMVA::Tools::Instance();
+   // Here the preparation phase begins
+   // Read training and test data
+   // (it is also possible to use ASCII format as input -> see TMVA Users Guide)
+   TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/home/public/data/ElectronTraining/Electrons.root");
+      if (!f || !f->IsOpen()) {
+         f = new TFile("/home/public/data/ElectronTraining/Electrons.root");
+      }
+     
+      
+	
+   TTree *signalTree     ;
+   TTree *background     ; 
+
+   f->GetObject("signal",signalTree);
+	
+   Init(signalTree);
+
+   f->GetObject("background",background);
+	
+   Init(background);
+
+
+
+   // Create a ROOT output file where TMVA will store ntuples, histograms, etc.
+   TString outfileName( "TMVA.root" );
+   TFile* outputFile = TFile::Open( outfileName, "RECREATE" );
+   // Create the factory object. Later you can choose the methods
+   // whose performance you'd like to investigate. The factory is
+   // the only TMVA object you have to interact with
+   //
+   // The first argument is the base of the name of all the
+   // weightfiles in the directory weight/
+   //
+   // The second argument is the output file for the training results
+   // All TMVA output can be suppressed by removing the "!" (not) in
+   // front of the "Silent" argument in the option string
+   TMVA::Factory *factory = new TMVA::Factory( "TMVAClassification", outputFile,
+                                               "!V:!Silent:Color:DrawProgressBar:Transformations=I;D;P;G,D:AnalysisType=Classification" );
+   TMVA::DataLoader *dataloader=new TMVA::DataLoader("dataset");
+   // If you wish to modify default settings
+   // (please check "src/Config.h" to see all available global options)
+   //
+   //    (TMVA::gConfig().GetVariablePlotting()).fTimesRMS = 8.0;
+   //    (TMVA::gConfig().GetIONames()).fWeightFileDir = "myWeightDirectory";
+   // Define the input variables that shall be used for the MVA training
+   // note that you may also use variable expressions, such as: "3*var1/var2*abs(var3)"
+   // [all types of expressions that can also be parsed by TTree::Draw( "expression" )]
+   dataloader->AddVariable( "ele_pt","var_1","", 'F' );
+   dataloader->AddVariable( "scl_eta", "var_2", "", 'F' );
+   dataloader->AddVariable( "ele_fbrem",                "var_3", "", 'F' );
+  
+   
+   // You can add an arbitrary number of signal or background trees
+   dataloader->AddSignalTree    ( signalTree,     1. );
+   dataloader->AddBackgroundTree( background, 1. );
+  
+  
+   dataloader->PrepareTrainingAndTestTree( "","",
+                                        "nTrain_Signal=1000:nTrain_Background=1000:SplitMode=Random:NormMode=NumEvents:!V" );
+   if (metoda=="MLP")
+      factory->BookMethod( dataloader, TMVA::Types::kMLP, "MLP", "H:!V:NeuronType=tanh:VarTransform=N:NCycles=600:HiddenLayers=N+5:TestRate=5:!UseRegulator" );
+
+   if (metoda=="BDTG") // Gradient Boost
+      factory->BookMethod( dataloader, TMVA::Types::kBDT, "BDTG",
+                           "!H:!V:NTrees=1000:MinNodeSize=2.5%:BoostType=Grad:Shrinkage=0.10:UseBaggedBoost:BaggedSampleFraction=0.5:nCuts=20:MaxDepth=2" );
+   
+   // For an example of the category classifier usage, see: TMVAClassificationCategory
+   //
+   // --------------------------------------------------------------------------------------------------
+   //  Now you can optimize the setting (configuration) of the MVAs using the set of training events
+   // STILL EXPERIMENTAL and only implemented for BDT's !
+   //
+   //     factory->OptimizeAllMethods("SigEffAt001","Scan");
+   //     factory->OptimizeAllMethods("ROCIntegral","FitGA");
+   //
+   // --------------------------------------------------------------------------------------------------
+   // Now you can tell the factory to train, test, and evaluate the MVAs
+   //
+   // Train MVAs using the set of training events
+   factory->TrainAllMethods();
+   // Evaluate all MVAs using the set of test events
+   factory->TestAllMethods();
+   // Evaluate and compare performance of all configured MVAs
+   factory->EvaluateAllMethods();
+   // --------------------------------------------------------------
+   // Save the output
+   outputFile->Close();
+   std::cout << "==> Wrote root file: " << outputFile->GetName() << std::endl;
+   std::cout << "==> TMVAClassification is done!" << std::endl;
+   delete factory;
+   delete dataloader;
+   // Launch the GUI for the root macros
+   //if (!gROOT->IsBatch()) TMVA::TMVAGui( outfileName );
+   //return 0;
+}
+
