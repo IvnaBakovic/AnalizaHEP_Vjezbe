@@ -13,6 +13,8 @@ int main()
 
   analyzer = new Analyzer();
   analyzer->Loop();
+  analyzer->GenerateTestStatisticPDF(1000);
+  analyzer->CalculatePValue();
 
   delete analyzer;
 

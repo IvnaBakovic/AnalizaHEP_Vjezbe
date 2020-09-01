@@ -11,6 +11,8 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include <TH1F.h>
+#include <TRandom3.h>
 
 #include <iostream>
 using namespace std;
@@ -53,6 +55,11 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
+   void GenerateTestStatisticPDF(int);
+   void CalculatePValue();
+   TH1F *TestStatistic_PDF, *recoMass;
+   TRandom3 *r3;
+   TF1 *theoryFunction, *theoreticalPDF;
 };
 
 #endif
@@ -71,6 +78,7 @@ Analyzer::Analyzer(TTree *tree) : fChain(0)
 
    }
    Init(tree);
+   r3 = new TRandom3();
 }
 
 Analyzer::~Analyzer()
